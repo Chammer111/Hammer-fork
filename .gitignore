@@ -53,3 +53,13 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# LaTeX auxiliary and log files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.synctex.gz
+
+# Compiled PDF output (recommended to ignore build artifacts)
+*.pdf
