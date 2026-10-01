@@ -90,3 +90,26 @@ git push
 ```
 
 **Important:** Do not work directly on `main`. Use your own branch for development and merge your completed work into `main` when it is ready.
+
+# Running code 
+
+We can use the makefile to build and run our data file:
+
+```python
+file_choice = [fcfs, sjf, pri, pri-rr, rr]
+
+```
+```bash
+make your-file-choice
+```
+
+make sure to update your gitignore file with 
+```.gitignore
+*.class
+```
+
+you can clean up all your unneeded classes file 
+
+```bash
+make clean
+```

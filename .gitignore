@@ -63,3 +63,4 @@ dkms.conf
 
 # Compiled PDF output (recommended to ignore build artifacts)
 *.pdf
+*.class
