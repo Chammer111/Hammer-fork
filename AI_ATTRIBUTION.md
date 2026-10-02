@@ -1,7 +1,7 @@
 # Academic Integrity & Generative AI Attribution Statement
 
 ## Course & Project Information
-* **Student** who used AI for this portion:  Christopher Hammer 
+* **Student who used AI for this portion**:  Christopher Hammer 
 * **Course**: CS3600-001 Operating Systems
 * **Project**: Project 1 — CPU Process Scheduling Algorithms
 * **Term**: Fall 2026
