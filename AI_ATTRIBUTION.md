@@ -52,7 +52,54 @@ Throughout this project, AI was utilized as an **interactive pedagogical workben
 
 ---
 
-## 3. Tool Inventory & Scope of Use
+## 3. Formal Mathematical Framework & Mapping to Java Abstractions
+
+To bridge the gap between abstract mathematical definitions and high-level object-oriented Java code, the implementation of [`java/Priority.java`](java/Priority.java) was explicitly derived from formal algebraic structures and discrete-event state machines:
+
+### 3.1. Algebraic Signature of the Scheduler
+The Java interface `Algorithm` is formalized as an algebraic signature:
+$$\Sigma_{\text{Algorithm}} = \Big(\, \{\text{Task}\},\quad \{\texttt{schedule} : \emptyset \to \text{void},\ \ \texttt{pickNextTask} : \emptyset \to \text{Task}\} \,\Big)$$
+The class `Priority` serves as a concrete model providing interpretations for the function symbols in $\Sigma_{\text{Algorithm}}$.
+
+### 3.2. Priority Ordering as a Pulled-Back Total Preorder
+Let $T = \{t_1, t_2, \dots, t_n\}$ be the finite set of ready tasks.
+1. **Projection Function**: The method reference `Task::getPriority` defines a projection $\pi_p : T \to \mathbb{Z}$ mapping each task to its integer priority $p \in [1, 10]$.
+2. **Induced Preorder**: The comparator constructs a total preorder $\succeq$ pulled back from the natural order on $\mathbb{Z}$:
+   $$t_a \succeq t_b \iff \pi_p(t_a) \ge \pi_p(t_b)$$
+   Reversing the comparator (`reversed()`) ensures tasks with higher numerical priority values dominate.
+3. **TimSort Stability & FCFS Tie-Breaking**:
+   Because Java's `List.sort()` implements TimSort, the ordering is guaranteed to be **stable**. For equal-priority tasks, the initial index in the ready queue is strictly preserved:
+   $$\pi_p(t_a) = \pi_p(t_b) \land \text{index}(t_a) < \text{index}(t_b) \implies t_a \text{ strictly precedes } t_b$$
+   This automatically enforces First-Come, First-Served (FCFS) tie-breaking without auxiliary comparators.
+
+### 3.3. Discrete-Event Simulation as a State Machine
+The scheduling loop in `schedule()` executes as a deterministic state machine. At step $k$, the OS state is an ordered 4-tuple:
+$$S_k = \langle \tau_k, Q_k, W_k, C_k \rangle$$
+where $\tau_k \in \mathbb{R}_{\ge 0}$ is the monotonically increasing system clock, $Q_k \subseteq T$ is the remaining ready queue, $W_k \in \mathbb{R}_{\ge 0}$ is the cumulative waiting time accumulator, and $C_k \in \mathbb{R}_{\ge 0}$ is the cumulative turnaround time accumulator.
+
+* **Initial State**: $S_0 = \langle 0, Q_0, 0, 0 \rangle$
+* **State Transition ($S_k \to S_{k+1}$)**:
+  Extracting the maximal element $t^* = \operatorname{argmax}_{\succeq}(Q_k) = \texttt{pickNextTask}()$ with CPU burst $B(t^*)$:
+  $$\begin{aligned}
+  \tau_{k+1} &= \tau_k + B(t^*) && \text{(monotonically advance clock)} \\
+  W_{k+1} &= W_k + \tau_k && \text{(task waited }\tau_k\text{ ms from arrival at } 0) \\
+  C_{k+1} &= C_k + \tau_{k+1} && \text{(task completed at }\tau_{k+1}\text{ ms)} \\
+  Q_{k+1} &= Q_k \setminus \{t^*\} && \text{(task departs ready queue)}
+  \end{aligned}$$
+* **Terminal State & Metrics**:
+  When $Q_m = \emptyset$ (where $m = |Q_0|$):
+  $$\overline{T}_{\text{wait}} = \frac{W_m}{m} = \frac{600}{8} = 75.00\text{ ms}$$
+  $$\overline{T}_{\text{turnaround}} = \frac{C_m}{m} = \frac{770}{8} = 96.25\text{ ms}$$
+
+### 3.4. Workload Conservation Invariant
+For all non-preemptive work-conserving schedulers under simultaneous arrival ($A_i = 0$):
+$$\overline{T}_{\text{turnaround}} = \overline{T}_{\text{wait}} + \overline{B}$$
+where $\overline{B} = \frac{1}{m} \sum_{i=1}^m B_i$. For `schedule.txt`:
+$$96.25\text{ ms} = 75.00\text{ ms} + 21.25\text{ ms} \quad \checkmark$$
+
+---
+
+## 4. Tool Inventory & Scope of Use
 
 ### A. Google Antigravity CLI (Gemini)
 * **Role**: Interactive Socratic tutor and project coordinator.
@@ -75,7 +122,7 @@ Throughout this project, AI was utilized as an **interactive pedagogical workben
 
 ---
 
-## 4. Algorithm-by-Algorithm Attribution Log
+## 5. Algorithm-by-Algorithm Attribution Log
 
 | Algorithm | Primary Implementation & Authorship | AI Assistance Utilized | Verification Method |
 | :--- | :--- | :--- | :--- |
@@ -87,7 +134,7 @@ Throughout this project, AI was utilized as an **interactive pedagogical workben
 
 ---
 
-## 5. Official Stamp of Approval & Verification Audit
+## 6. Official Stamp of Approval & Verification Audit
 
 | Category | Evaluation Method | Result | Verification Notes |
 | :--- | :--- | :--- | :--- |

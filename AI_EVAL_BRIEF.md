@@ -15,11 +15,12 @@
 
 ---
 
-### 1. Specification Compliance
-* **Algorithm**: Non-preemptive Priority Scheduling with simultaneous arrival at $t=0$.
-* **Priority Domain**: Integers $1 \to 10$ ($10$ is highest priority).
-* **Ordering Implementation**: `queue.sort(Comparator.comparingInt(Task::getPriority).reversed())`.
-* **Tie-Breaking**: Automatic FCFS arrival order via TimSort algorithm stability.
+### 1. Specification Compliance & Formal Mathematical Formulation
+* **Algebraic Signature**: $\Sigma_{\text{Algorithm}} = ( \{\text{Task}\}, \{\texttt{schedule} : \emptyset \to \text{void},\ \texttt{pickNextTask} : \emptyset \to \text{Task}\} )$.
+* **Total Preorder**: Pulled back via projection $\pi_p : T \to \mathbb{Z}$: $t_a \succeq t_b \iff \pi_p(t_a) \ge \pi_p(t_b)$ (descending priority domain $10 \to 1$).
+* **TimSort Stability**: $\pi_p(t_a) = \pi_p(t_b) \land \text{index}(t_a) < \text{index}(t_b) \implies t_a \prec_{\text{order}} t_b$ (automatic FCFS tie-breaking).
+* **State Machine Recurrence**: $S_k = \langle \tau_k, Q_k, W_k, C_k \rangle$ where $\tau_{k+1} = \tau_k + B(t^*)$, $W_{k+1} = W_k + \tau_k$, $C_{k+1} = C_k + \tau_{k+1}$, $Q_{k+1} = Q_k \setminus \{t^*\}$.
+* **Workload Conservation Invariant**: $\overline{T}_{\text{turnaround}} = \overline{T}_{\text{wait}} + \overline{B}$ ($75.00 + 21.25 = 96.25\text{ ms}$).
 * **Interface**: Implements `Algorithm.java` (`schedule()`, `pickNextTask()`), dispatches via `CPU.run()`.
 * **Metrics**: Turnaround ($C_i - A_i$), Waiting ($C_i - A_i - B_i$), Response ($t_{\text{start}} - A_i$), formatted `%.2f ms`.
 
